@@ -108,3 +108,39 @@ header {
   color: red;
   font-size: 13px;
 }
+/* Panel detalles */
+.details {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 320px;
+  background: white;
+  padding: 20px;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.details img {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.price {
+  font-size: 28px;
+  color: #c0392b;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 30px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}

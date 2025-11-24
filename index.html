@@ -7,14 +7,27 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <!-- Contenedor principal -->
     <div class="container">
+      <!-- Encabezado con título y botón de añadir -->
       <header>
         <h1>Catálogo de Productos</h1>
         <button id="addBtn">+ Añadir producto</button>
       </header>
 
+      <!-- Grid donde se mostrarán los productos -->
       <div id="grid" class="grid"></div>
     </div>
+
+    <!-- Panel lateral de detalles de un producto -->
+    <div id="details" class="details hidden">
+      <button id="closeDetails" class="close">×</button>
+      <img id="detailImg" src="" alt="Imagen del producto" />
+      <h2 id="detailName"></h2>
+      <p id="detailId"></p>
+      <p class="price" id="detailPrice"></p>
+    </div>
+
     <!-- Modal para añadir producto -->
     <div id="modal" class="modal hidden">
       <div class="modal-content">
@@ -30,6 +43,9 @@
           <label>Precio (€):</label>
           <input type="number" step="0.01" id="price" required />
 
+          <label>Descripción:</label>
+          <textarea id="desc" rows="3" required></textarea>
+
           <label>Imagen:</label>
           <input type="file" id="image" accept="image/*" required />
 
@@ -40,6 +56,7 @@
         </form>
       </div>
     </div>
+
     <script src="script.js"></script>
   </body>
 </html>
