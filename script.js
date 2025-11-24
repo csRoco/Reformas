@@ -1,5 +1,6 @@
 // Array para guardar los productos
 let productos = [];
+console.log("Productos inicial:", productos);
 
 // Referencias a elementos del DOM
 const addBtn = document.getElementById("addBtn");
@@ -11,20 +12,37 @@ const details = document.getElementById("details");
 const closeDetails = document.getElementById("closeDetails");
 const cancelBtn = document.getElementById("cancel");
 
-// Abrir el modal para añadir un producto (FUERA del submit)
+console.log("Elementos del DOM cargados:", {
+  addBtn,
+  modal,
+  form,
+  grid,
+  contador,
+  details,
+});
+
+// Abrir el modal para añadir un producto
 addBtn.addEventListener("click", () => {
+  console.log("Botón 'Añadir' clickeado");
   form.reset();
   limpiarErrores();
   modal.classList.remove("hidden");
 });
 
-// Cerrar el modal (FUERA del submit)
-cancelBtn.addEventListener("click", () => modal.classList.add("hidden"));
+// Cerrar el modal o detalles
+cancelBtn.addEventListener("click", () => {
+  console.log("Modal cerrado");
+  modal.classList.add("hidden");
+});
+closeDetails.addEventListener("click", () => {
+  console.log("Detalles cerrados");
+  details.classList.add("hidden");
+});
 
-// Se añade un "listener" al formulario para interceptar el evento submit
+// Manejar el submit del formulario
 form.addEventListener("submit", function (e) {
-  // Evita que el formulario se envíe y recargue la página
   e.preventDefault();
+  console.log("Formulario enviado");
 
   // Obtener valores del formulario
   const id = document.getElementById("id").value.trim();
@@ -33,51 +51,93 @@ form.addEventListener("submit", function (e) {
   const desc = document.getElementById("desc").value.trim();
   const file = document.getElementById("image").files[0];
 
-  // Limpia mensajes de error anteriores
-  limpiarErrores();
+  console.log("Datos del formulario:", { id, nombre, precio, desc, file });
 
-  // Variable de control para validar el formulario
+  limpiarErrores();
   let ok = true;
 
-  // Validación del ID
+  // Validaciones
   if (!id) {
-    // Si el campo está vacío, muestra un error
     document.getElementById("err-id").textContent = "El ID es obligatorio";
     ok = false;
+    console.log("Error: ID vacío");
   } else if (productos.some((p) => p.id === id)) {
-    // Si el ID ya existe en la lista de productos, muestra otro error
     document.getElementById("err-id").textContent = "Ese ID ya existe";
     ok = false;
+    console.log("Error: ID duplicado");
   }
 
-  // Si hay errores o no hay imagen, se detiene aquí
-  if (!ok || !file) return;
+  if (!nombre) {
+    ok = false;
+    console.log("Error: Nombre vacío");
+  }
+  if (!precio) {
+    ok = false;
+    console.log("Error: Precio vacío");
+  }
+  if (!desc) {
+    ok = false;
+    console.log("Error: Descripción vacía");
+  }
+  if (!file) {
+    ok = false;
+    console.log("Error: Imagen no seleccionada");
+  }
 
-  // Crea una URL temporal para mostrar la imagen seleccionada en la página
+  if (!ok) return;
+
+  // Crear URL temporal de la imagen
   const imagenUrl = URL.createObjectURL(file);
+  console.log("URL temporal de la imagen creada:", imagenUrl);
 
-  // Crea un objeto producto con los datos del formulario
-  const producto = { id, nombre, precio, imagen: imagenUrl };
+  // Crear objeto producto
+  const producto = { id, nombre, precio, desc, imagen: imagenUrl };
   productos.push(producto);
+  console.log("Producto añadido:", producto);
+  console.log("Array de productos ahora:", productos);
 
-  // Muestra el producto en la interfaz
-  mostrarProducto(producto);
-
-  // Oculta el modal del formulario
+  añadirTarjeta(producto);
+  actualizarContador();
   modal.classList.add("hidden");
+  console.log("Modal cerrado tras añadir producto");
 });
 
-// Función que limpia todos los mensajes de error visibles
+// Función para limpiar errores
 function limpiarErrores() {
   document.querySelectorAll(".error").forEach((e) => (e.textContent = ""));
+  console.log("Errores limpiados");
 }
 
-function mostrarProducto(p) {
+// Crear tarjeta del producto
+function añadirTarjeta(p) {
+  document.querySelector(".empty")?.remove();
+  console.log("Añadiendo tarjeta para producto:", p);
+
   const div = document.createElement("div");
   div.className = "card";
   div.innerHTML = `
     <img src="${p.imagen}" alt="${p.nombre}">
     <h3>${p.nombre}</h3>
   `;
+  div.onclick = () => mostrarDetalles(p);
   grid.appendChild(div);
+  console.log("Tarjeta añadida al grid");
+}
+
+// Mostrar detalles de un producto
+function mostrarDetalles(p) {
+  console.log("Mostrando detalles de producto:", p);
+  document.getElementById("detailImg").src = p.imagen;
+  document.getElementById("detailName").textContent = p.nombre;
+  document.getElementById("detailId").textContent = "ID: " + p.id;
+  document.getElementById("detailPrice").textContent = p.precio + " €";
+  document.getElementById("detailDesc").textContent = p.desc;
+  details.classList.remove("hidden");
+}
+
+// Actualizar contador de productos
+function actualizarContador() {
+  contador.textContent =
+    productos.length + (productos.length === 1 ? " producto" : " productos");
+  console.log("Contador actualizado:", contador.textContent);
 }

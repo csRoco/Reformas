@@ -7,25 +7,31 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <!-- Contenedor principal -->
     <div class="container">
-      <!-- Encabezado con título y botón de añadir -->
       <header>
         <h1>Catálogo de Productos</h1>
-        <button id="addBtn">+ Añadir producto</button>
+        <div class="header-right">
+          <span id="contador">0 productos</span>
+          <button id="addBtn">+ Añadir producto</button>
+        </div>
       </header>
 
-      <!-- Grid donde se mostrarán los productos -->
-      <div id="grid" class="grid"></div>
+      <div id="grid" class="grid">
+        <div class="empty">
+          Todavía no hay productos.<br />Añade el primero pulsando el botón de
+          arriba.
+        </div>
+      </div>
     </div>
 
-    <!-- Panel lateral de detalles de un producto -->
+    <!-- Panel lateral de detalles -->
     <div id="details" class="details hidden">
       <button id="closeDetails" class="close">×</button>
-      <img id="detailImg" src="" alt="Imagen del producto" />
+      <img id="detailImg" src="" alt="" />
       <h2 id="detailName"></h2>
       <p id="detailId"></p>
       <p class="price" id="detailPrice"></p>
+      <p id="detailDesc"></p>
     </div>
 
     <!-- Modal para añadir producto -->

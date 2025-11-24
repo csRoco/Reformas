@@ -5,8 +5,9 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
+  font-family: "Segoe UI", Arial, sans-serif;
   background: #f4f4f4;
+  color: #333;
 }
 
 .container {
@@ -24,6 +25,21 @@ header {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
+}
+
+header h1 {
+  font-size: 24px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+#contador {
+  font-size: 14px;
+  color: #666;
 }
 
 #addBtn {
@@ -44,35 +60,6 @@ header {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 20px;
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-content {
-  background: white;
-  padding: 30px;
-  width: 90%;
-  max-width: 400px;
-}
-
-.modal-content input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-}
-
-.hidden {
-  display: none !important;
 }
 
 .card {
@@ -98,16 +85,26 @@ header {
 .card h3 {
   padding: 12px;
   text-align: center;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.9);
   color: white;
   margin-top: -50px;
   position: relative;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.error {
-  color: red;
-  font-size: 13px;
+.card:hover h3 {
+  opacity: 1;
 }
+
+.empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px;
+  font-size: 18px;
+  color: #777;
+}
+
 /* Panel detalles */
 .details {
   position: fixed;
@@ -143,4 +140,76 @@ header {
   background: none;
   border: none;
   cursor: pointer;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+}
+
+.modal-content h2 {
+  margin-bottom: 20px;
+}
+
+.modal-content label {
+  display: block;
+  margin: 15px 0 5px;
+  font-weight: bold;
+}
+
+.modal-content input,
+.modal-content textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.error {
+  color: red;
+  font-size: 13px;
+}
+
+.buttons {
+  margin-top: 25px;
+  text-align: right;
+}
+
+.buttons button {
+  padding: 10px 16px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#cancel {
+  background: #95a5a6;
+  color: white;
+}
+
+#form button[type="submit"] {
+  background: #27ae60;
+  color: white;
+}
+
+.hidden {
+  display: none !important;
 }
