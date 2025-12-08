@@ -55,8 +55,12 @@
           <textarea id="desc" rows="3"></textarea>
           <span class="error" id="err-desc"></span>
 
-          <label>Imagen:</label>
-          <input type="file" id="image" accept="image/*" />
+          <label>Imagen (URL):</label>
+          <input
+            type="url"
+            id="image"
+            placeholder="https://ejemplo.com/imagen.jpg"
+          />
           <span class="error" id="err-image"></span>
 
           <div class="buttons">
@@ -67,6 +71,7 @@
       </div>
     </div>
 
+    <script src="api.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

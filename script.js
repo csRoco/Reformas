@@ -1,205 +1,211 @@
-// Array para guardar los productos
-let productos = [];
-console.log("Productos inicializados:", productos);
-
-// Referencias a elementos del DOM
-const addBtn = document.getElementById("addBtn");
+// elementos del dom
+const botonAnadir = document.getElementById("addBtn");
 const modal = document.getElementById("modal");
-const form = document.getElementById("form");
-const grid = document.getElementById("grid");
+const formulario = document.getElementById("form");
+const cuadricula = document.getElementById("grid");
 const contador = document.getElementById("contador");
-const details = document.getElementById("details");
-const closeDetails = document.getElementById("closeDetails");
-const cancelBtn = document.getElementById("cancel");
-console.log("Elementos del DOM cargados:", {
-  addBtn,
-  modal,
-  form,
-  grid,
-  contador,
-  details,
-});
+const detalles = document.getElementById("details");
+const cerrarDetalles = document.getElementById("closeDetails");
+const botonCancelar = document.getElementById("cancel");
 
-// Abrir el modal para añadir un producto
-addBtn.addEventListener("click", () => {
-  console.log("Botón 'Añadir producto' clickeado");
-  form.reset();
+// abrir modal
+botonAnadir.addEventListener("click", () => {
+  formulario.reset();
   limpiarErrores();
   modal.classList.remove("hidden");
 });
 
-// Cerrar el modal o detalles
-cancelBtn.addEventListener("click", () => {
-  console.log("Modal cerrado");
-  modal.classList.add("hidden");
-});
-closeDetails.addEventListener("click", () => {
-  console.log("Detalles cerrados");
-  details.classList.add("hidden");
-});
+// cerrar cosas
+botonCancelar.addEventListener("click", () => modal.classList.add("hidden"));
+cerrarDetalles.addEventListener("click", () => detalles.classList.add("hidden"));
 
-// Manejar el submit del formulario
-form.addEventListener("submit", function (e) {
+/***********************************************************************************************************************/
+
+// validar que la imagen existe antes de guardar
+function validarImagen(url) {
+  return new Promise((resolver, rechazar) => {
+    const img = new Image();
+    
+    img.onload = () => resolver();
+    img.onerror = () => rechazar("La URL de la imagen no es válida");
+    
+    // por si tarda mucho
+    setTimeout(() => rechazar("La imagen tarda demasiado en cargar"), 10000);
+    
+    img.src = url;
+  });
+}
+
+/***********************************************************************************************************************/
+
+// cuando se envia el formulario
+formulario.addEventListener("submit", async function(e) {
   e.preventDefault();
-  console.log("Formulario enviado");
-
-  // Obtener valores del formulario
+  console.log("Enviando formulario...");
+  
+  // cogemos los datos
   const id = document.getElementById("id").value.trim();
   const nombre = document.getElementById("name").value.trim();
   const precio = document.getElementById("price").value;
-  const desc = document.getElementById("desc").value.trim();
-  const file = document.getElementById("image").files[0];
-  console.log("Datos del formulario:", { id, nombre, precio, desc, file });
-
+  const descripcion = document.getElementById("desc").value.trim();
+  const imagen = document.getElementById("image").value.trim();
+  
   limpiarErrores();
-  let ok = true;
-
-  // Validación del ID
+  let hayErrores = false;
+  
+  // validaciones basicas
   if (!id) {
     mostrarError("id", "El ID es obligatorio");
-    ok = false;
-    console.log("Error: ID vacío");
-  } else if (productos.some((p) => p.id === id)) {
-    mostrarError("id", "Ese ID ya existe");
-    ok = false;
-    console.log("Error: ID duplicado");
+    hayErrores = true;
   }
-
-  // Validación del nombre
   if (!nombre) {
     mostrarError("name", "El nombre es obligatorio");
-    ok = false;
-    console.log("Error: Nombre vacío");
+    hayErrores = true;
   }
-
-  // Validación del precio
-  if (!precio) {
-    mostrarError("price", "El precio es obligatorio");
-    ok = false;
-    console.log("Error: Precio vacío");
-  } else if (isNaN(precio) || parseFloat(precio) <= 0) {
-    mostrarError("price", "El precio debe ser un número positivo");
-    ok = false;
-    console.log("Error: Precio inválido");
+  if (!precio || isNaN(precio) || parseFloat(precio) <= 0) {
+    mostrarError("price", "Pon un precio válido");
+    hayErrores = true;
   }
-
-  // Validación de la descripción
-  if (!desc) {
+  if (!descripcion) {
     mostrarError("desc", "La descripción es obligatoria");
-    ok = false;
-    console.log("Error: Descripción vacía");
+    hayErrores = true;
   }
-
-  // Validación de la imagen
-  if (!file) {
-    mostrarError("image", "Debes seleccionar una imagen");
-    ok = false;
-    console.log("Error: Imagen no seleccionada");
+  if (!imagen) {
+    mostrarError("image", "Pon una URL de imagen");
+    hayErrores = true;
   }
-
-  if (!ok) return;
-
-  // Crear URL temporal de la imagen
-  const imagenUrl = URL.createObjectURL(file);
-  console.log("URL temporal de la imagen creada:", imagenUrl);
-
-  // Crear objeto producto
-  const producto = { id, nombre, precio, desc, imagen: imagenUrl };
-  productos.push(producto);
-  console.log("Producto añadido:", producto);
-  console.log("Array de productos actual:", productos);
-
-  añadirTarjeta(producto);
-  actualizarContador();
-  modal.classList.add("hidden");
-  console.log("Modal cerrado tras añadir producto");
+  
+  if (hayErrores) return;
+  
+  const boton = formulario.querySelector('button[type="submit"]');
+  boton.disabled = true;
+  boton.textContent = "Validando imagen...";
+  
+  // primero comprobamos que la imagen carga bien
+  try {
+    await validarImagen(imagen);
+  } catch (err) {
+    mostrarError("image", err);
+    boton.disabled = false;
+    boton.textContent = "Guardar";
+    return;
+  }
+  
+  // ahora guardamos en la "api"
+  boton.textContent = "Guardando...";
+  
+  const producto = { id, nombre, precio, desc: descripcion, imagen };
+  
+  API.guardarProducto(producto)
+    .then(() => {
+      // todo bien, creamos la tarjeta
+      console.log("Producto guardado correctamente");
+      crearTarjeta(producto);
+      actualizarContador();
+      formulario.reset();
+      modal.classList.add("hidden");
+    })
+    .catch((error) => {
+      // si el id ya existe o algo asi
+      console.log("Error al guardar:", error);
+      mostrarError("id", error);
+    })
+    .finally(() => {
+      boton.disabled = false;
+      boton.textContent = "Guardar";
+    });
 });
 
-// Función para mostrar errores
+/***********************************************************************************************************************/
+
 function mostrarError(campo, mensaje) {
   const input = document.getElementById(campo);
-  const errorSpan = document.getElementById("err-" + campo);
-
+  const span = document.getElementById("err-" + campo);
   input.classList.add("input-error");
-  if (errorSpan) {
-    errorSpan.textContent = mensaje;
-  }
-  console.log(`Error en ${campo}: ${mensaje}`);
+  if (span) span.textContent = mensaje;
 }
 
-// Función para limpiar errores
+/***********************************************************************************************************************/
+
 function limpiarErrores() {
-  document.querySelectorAll(".error").forEach((e) => (e.textContent = ""));
-  document.querySelectorAll("input, textarea").forEach((input) => {
-    input.classList.remove("input-error");
+  document.querySelectorAll(".error").forEach(e => e.textContent = "");
+  document.querySelectorAll("input, textarea").forEach(elemento => {
+    elemento.classList.remove("input-error");
   });
-  console.log("Errores limpiados");
 }
 
-// Crear tarjeta del producto
-function añadirTarjeta(p) {
-  document.querySelector(".empty")?.remove();
-  console.log("Añadiendo tarjeta para producto:", p);
+/***********************************************************************************************************************/
 
-  const div = document.createElement("div");
-  div.className = "card";
-  div.innerHTML = `
-    <img src="${p.imagen}" alt="${p.nombre}">
-    <h3>${p.nombre}</h3>
+// crear la tarjeta del producto en el grid
+function crearTarjeta(producto) {
+  // quitamos el mensaje de "no hay productos" si existe
+  const vacio = document.querySelector(".empty");
+  if (vacio) vacio.remove();
+  
+  const tarjeta = document.createElement("div");
+  tarjeta.className = "card";
+  tarjeta.dataset.id = producto.id;
+  tarjeta.innerHTML = `
+    <img src="${producto.imagen}" alt="${producto.nombre}">
+    <h3>${producto.nombre}</h3>
   `;
-  div.onclick = () => {
-    console.log("Tarjeta clickeada:", p);
-    mostrarDetalles(p);
-  };
-
-  // Menú contextual para eliminar
-  div.oncontextmenu = (e) => {
+  
+  // click para ver detalles
+  tarjeta.onclick = () => mostrarDetalles(producto);
+  
+  // click derecho para eliminar
+  tarjeta.oncontextmenu = async (e) => {
     e.preventDefault();
-    console.log("Intento de eliminar producto:", p);
-    if (confirm(`¿Eliminar el producto "${p.nombre}"?`)) {
-      eliminarProducto(p.id, div);
+    if (confirm(`¿Seguro que quieres eliminar "${producto.nombre}"?`)) {
+      await borrarProducto(producto.id, tarjeta);
     }
   };
-
-  grid.appendChild(div);
-  console.log("Tarjeta añadida al grid");
+  
+  cuadricula.appendChild(tarjeta);
 }
 
-// Eliminar producto
-function eliminarProducto(id, elemento) {
-  productos = productos.filter((p) => p.id !== id);
-  elemento.remove();
-  actualizarContador();
-  console.log(
-    `Producto con ID ${id} eliminado. Productos restantes:`,
-    productos
-  );
+/***********************************************************************************************************************/
 
-  // Si no quedan productos, mostrar mensaje
-  if (productos.length === 0) {
-    grid.innerHTML = `
-      <div class="empty">
-        Todavía no hay productos.<br />Añade el primero pulsando el botón de arriba.
-      </div>
-    `;
-    console.log("No quedan productos en el grid");
+// borrar producto (asincrono con async/await)
+async function borrarProducto(id, tarjeta) {
+  // ponemos la tarjeta medio transparente mientras se borra
+  tarjeta.classList.add("loading");
+  
+  try {
+    await API.borrarProducto(id);
+    console.log("Producto eliminado");
+    tarjeta.remove();
+    actualizarContador();
+    
+    // si no quedan productos mostramos el mensaje
+    if (API.contarProductos() === 0) {
+      cuadricula.innerHTML = `
+        <div class="empty">
+          Todavía no hay productos.<br>Añade el primero pulsando el botón de arriba.
+        </div>
+      `;
+    }
+  } catch (error) {
+    console.log("Error al borrar:", error);
+    tarjeta.classList.remove("loading");
+    alert("No se pudo eliminar: " + error);
   }
 }
 
-// Mostrar detalles de un producto
-function mostrarDetalles(p) {
-  console.log("Mostrando detalles de producto:", p);
-  document.getElementById("detailImg").src = p.imagen;
-  document.getElementById("detailName").textContent = p.nombre;
-  document.getElementById("detailId").textContent = "ID: " + p.id;
-  document.getElementById("detailPrice").textContent = p.precio + " €";
-  document.getElementById("detailDesc").textContent = p.desc;
-  details.classList.remove("hidden");
+/***********************************************************************************************************************/
+
+function mostrarDetalles(producto) {
+  document.getElementById("detailImg").src = producto.imagen;
+  document.getElementById("detailName").textContent = producto.nombre;
+  document.getElementById("detailId").textContent = "ID: " + producto.id;
+  document.getElementById("detailPrice").textContent = producto.precio + " €";
+  document.getElementById("detailDesc").textContent = producto.desc;
+  detalles.classList.remove("hidden");
 }
 
-// Actualizar contador de productos
+/***********************************************************************************************************************/
+
 function actualizarContador() {
-  contador.textContent =
-    productos.length + (productos.length === 1 ? " producto" : " productos");
-  console.log("Contador actualizado:", contador.textContent);
+  const total = API.contarProductos();
+  contador.textContent = total + (total === 1 ? " producto" : " productos");
 }
