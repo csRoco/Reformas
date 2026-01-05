@@ -21,6 +21,51 @@ cerrarDetalles.addEventListener("click", () => detalles.classList.add("hidden"))
 
 /***********************************************************************************************************************/
 
+// Cargar productos desde la base de datos al iniciar
+async function cargarProductos() {
+  try {
+    // Mostrar estado de carga
+    cuadricula.innerHTML = '<div class="empty">Cargando productos...</div>';
+    
+    const productos = await API.obtenerProductos();
+    
+    // Limpiar el grid
+    cuadricula.innerHTML = "";
+    
+    if (productos.length === 0) {
+      cuadricula.innerHTML = `
+        <div class="empty">
+          Todavía no hay productos.<br>Añade el primero pulsando el botón de arriba.
+        </div>
+      `;
+    } else {
+      // Crear tarjetas para cada producto
+      productos.forEach(producto => {
+        crearTarjeta(producto);
+      });
+    }
+    
+    actualizarContador();
+    mostrarMensaje("Productos cargados correctamente", "success");
+  } catch (error) {
+    console.error("Error al cargar productos:", error);
+    cuadricula.innerHTML = `
+      <div class="empty">
+        Error al cargar productos: ${error.message}<br>
+        Por favor, recarga la página.
+      </div>
+    `;
+    mostrarMensaje("Error al cargar productos: " + error.message, "error");
+  }
+}
+
+// Cargar productos cuando la página esté lista
+document.addEventListener("DOMContentLoaded", () => {
+  cargarProductos();
+});
+
+/***********************************************************************************************************************/
+
 // validar que la imagen existe antes de guardar
 function validarImagen(url) {
   return new Promise((resolver, rechazar) => {
@@ -53,25 +98,38 @@ formulario.addEventListener("submit", async function(e) {
   limpiarErrores();
   let hayErrores = false;
   
-  // validaciones basicas
+  // validaciones basicas (síncronas - frontend)
   if (!id) {
     mostrarError("id", "El ID es obligatorio");
     hayErrores = true;
+  } else if (id.length > 50) {
+    mostrarError("id", "El ID no puede tener más de 50 caracteres");
+    hayErrores = true;
   }
+  
   if (!nombre) {
     mostrarError("name", "El nombre es obligatorio");
     hayErrores = true;
+  } else if (nombre.length > 100) {
+    mostrarError("name", "El nombre no puede tener más de 100 caracteres");
+    hayErrores = true;
   }
+  
   if (!precio || isNaN(precio) || parseFloat(precio) <= 0) {
     mostrarError("price", "Pon un precio válido");
     hayErrores = true;
   }
+  
   if (!descripcion) {
     mostrarError("desc", "La descripción es obligatoria");
     hayErrores = true;
   }
+  
   if (!imagen) {
     mostrarError("image", "Pon una URL de imagen");
+    hayErrores = true;
+  } else if (imagen.length > 255) {
+    mostrarError("image", "La URL no puede tener más de 255 caracteres");
     hayErrores = true;
   }
   
@@ -91,29 +149,33 @@ formulario.addEventListener("submit", async function(e) {
     return;
   }
   
-  // ahora guardamos en la "api"
+  // ahora guardamos en la base de datos (operación asíncrona)
   boton.textContent = "Guardando...";
   
-  const producto = { id, nombre, precio, desc: descripcion, imagen };
+  const producto = { id, nombre, precio: parseFloat(precio), desc: descripcion, imagen };
   
-  API.guardarProducto(producto)
-    .then(() => {
-      // todo bien, creamos la tarjeta
-      console.log("Producto guardado correctamente");
-      crearTarjeta(producto);
-      actualizarContador();
-      formulario.reset();
-      modal.classList.add("hidden");
-    })
-    .catch((error) => {
-      // si el id ya existe o algo asi
-      console.log("Error al guardar:", error);
-      mostrarError("id", error);
-    })
-    .finally(() => {
-      boton.disabled = false;
-      boton.textContent = "Guardar";
-    });
+  try {
+    // Esperar respuesta del servidor (asíncrono)
+    const productoGuardado = await API.guardarProducto(producto);
+    
+    // Todo bien, creamos la tarjeta con los datos del servidor
+    console.log("Producto guardado correctamente");
+    crearTarjeta(productoGuardado);
+    actualizarContador();
+    formulario.reset();
+    modal.classList.add("hidden");
+    mostrarMensaje("Producto guardado correctamente", "success");
+  } catch (error) {
+    // Error del servidor (ID duplicado, error de conexión, etc.)
+    console.error("Error al guardar:", error);
+    const mensajeError = error.message || "Error al guardar el producto";
+    mostrarError("id", mensajeError);
+    mostrarMensaje(mensajeError, "error");
+  } finally {
+    // Siempre restaurar el botón, incluso si hay error
+    boton.disabled = false;
+    boton.textContent = "Guardar";
+  }
 });
 
 /***********************************************************************************************************************/
@@ -166,18 +228,22 @@ function crearTarjeta(producto) {
 
 /***********************************************************************************************************************/
 
-// borrar producto (asincrono con async/await)
+// borrar producto (asíncrono con async/await)
 async function borrarProducto(id, tarjeta) {
-  // ponemos la tarjeta medio transparente mientras se borra
+  // Ponemos la tarjeta medio transparente mientras se borra (feedback visual)
   tarjeta.classList.add("loading");
   
   try {
+    // Esperar respuesta del servidor (operación asíncrona)
     await API.borrarProducto(id);
     console.log("Producto eliminado");
+    
+    // Eliminar tarjeta del DOM
     tarjeta.remove();
     actualizarContador();
+    mostrarMensaje("Producto eliminado correctamente", "success");
     
-    // si no quedan productos mostramos el mensaje
+    // Si no quedan productos mostramos el mensaje
     if (API.contarProductos() === 0) {
       cuadricula.innerHTML = `
         <div class="empty">
@@ -186,9 +252,11 @@ async function borrarProducto(id, tarjeta) {
       `;
     }
   } catch (error) {
-    console.log("Error al borrar:", error);
+    // Error del servidor (producto no encontrado, error de conexión, etc.)
+    console.error("Error al borrar:", error);
     tarjeta.classList.remove("loading");
-    alert("No se pudo eliminar: " + error);
+    const mensajeError = error.message || "Error al eliminar el producto";
+    mostrarMensaje(mensajeError, "error");
   }
 }
 
@@ -199,7 +267,7 @@ function mostrarDetalles(producto) {
   document.getElementById("detailName").textContent = producto.nombre;
   document.getElementById("detailId").textContent = "ID: " + producto.id;
   document.getElementById("detailPrice").textContent = producto.precio + " €";
-  document.getElementById("detailDesc").textContent = producto.desc;
+  document.getElementById("detailDesc").textContent = producto.desc || "";
   detalles.classList.remove("hidden");
 }
 
@@ -208,4 +276,28 @@ function mostrarDetalles(producto) {
 function actualizarContador() {
   const total = API.contarProductos();
   contador.textContent = total + (total === 1 ? " producto" : " productos");
+}
+
+/***********************************************************************************************************************/
+
+// Mostrar mensaje de feedback (éxito o error)
+function mostrarMensaje(mensaje, tipo = "success") {
+  // Eliminar mensaje anterior si existe
+  const mensajeAnterior = document.querySelector(".mensaje");
+  if (mensajeAnterior) {
+    mensajeAnterior.remove();
+  }
+  
+  // Crear nuevo mensaje
+  const divMensaje = document.createElement("div");
+  divMensaje.className = `mensaje ${tipo}`;
+  divMensaje.textContent = mensaje;
+  
+  document.body.appendChild(divMensaje);
+  
+  // Eliminar después de 3 segundos
+  setTimeout(() => {
+    divMensaje.style.animation = "slideOut 0.3s ease";
+    setTimeout(() => divMensaje.remove(), 300);
+  }, 3000);
 }

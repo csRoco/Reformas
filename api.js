@@ -1,50 +1,96 @@
-// api.js - simula las llamadas al servidor
-console.log("API cargada");
+// api.js - API real con fetch hacia PHP/MySQL
+console.log("API cargada - Conectando con backend PHP");
 
 const API = {
-  // aqui guardamos los productos (como si fuera la base de datos)
+  // URL base del backend PHP (backend separado)
+  _baseURL: "http://catalogoapi.atwebpages.com/api.php",
+
+  // Cache local de productos para contar rápidamente
   _productos: [],
 
-  // guardar producto nuevo
-  guardarProducto(producto) {
-    return new Promise((resolver, rechazar) => {
-      // simulamos que tarda 2 seg como si fuera una peticion real
-      setTimeout(() => {
-        // miramos si ya existe ese id
-        const yaExiste = this._productos.find(p => p.id === producto.id);
-        
-        if (yaExiste) {
-          rechazar("Error: El ID ya existe");
-        } else {
-          this._productos.push(producto);
-          resolver("Producto guardado");
+  // Obtener todos los productos desde la base de datos
+  async obtenerProductos() {
+    try {
+      const respuesta = await fetch(this._baseURL, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
         }
-      }, 2000);
-    });
+      });
+
+      const resultado = await respuesta.json();
+
+      if (!resultado.success) {
+        throw new Error(resultado.error || "Error al obtener productos");
+      }
+
+      // Actualizar cache local
+      this._productos = resultado.data || [];
+      return this._productos;
+    } catch (error) {
+      console.error("Error al obtener productos:", error);
+      throw error;
+    }
   },
 
-  // borrar un producto por su id
-  borrarProducto(id) {
-    return new Promise((resolver, rechazar) => {
-      setTimeout(() => {
-        // a veces el servidor falla (10% de las veces)
-        if (Math.random() < 0.1) {
-          rechazar("Error del servidor: No se pudo eliminar el producto");
-          return;
-        }
-        
-        const indice = this._productos.findIndex(p => p.id === id);
-        if (indice === -1) {
-          rechazar("Error: Producto no encontrado");
-        } else {
-          this._productos.splice(indice, 1);
-          resolver("Producto eliminado");
-        }
-      }, 1500);
-    });
+  // Guardar producto nuevo en la base de datos
+  async guardarProducto(producto) {
+    try {
+      const respuesta = await fetch(this._baseURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(producto)
+      });
+
+      const resultado = await respuesta.json();
+
+      if (!resultado.success) {
+        // Extraer mensaje de error del servidor
+        const mensajeError = resultado.error || "Error al guardar el producto";
+        throw new Error(mensajeError);
+      }
+
+      // Actualizar cache local con el nuevo producto
+      this._productos.push(resultado.data);
+      
+      return resultado.data;
+    } catch (error) {
+      console.error("Error al guardar producto:", error);
+      throw error;
+    }
   },
 
-  // para saber cuantos hay
+  // Borrar un producto por su ID
+  async borrarProducto(id) {
+    try {
+      const respuesta = await fetch(this._baseURL, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ id: id })
+      });
+
+      const resultado = await respuesta.json();
+
+      if (!resultado.success) {
+        const mensajeError = resultado.error || "Error al eliminar el producto";
+        throw new Error(mensajeError);
+      }
+
+      // Actualizar cache local
+      this._productos = this._productos.filter(p => p.id !== id);
+      
+      return resultado.message;
+    } catch (error) {
+      console.error("Error al borrar producto:", error);
+      throw error;
+    }
+  },
+
+  // Contar productos (usa cache local)
   contarProductos() {
     return this._productos.length;
   }
