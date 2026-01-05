@@ -2,7 +2,7 @@
 console.log("API cargada - Conectando con backend PHP");
 
 const API = {
-  // URL base del backend PHP (backend separado)
+  // URL del backend PHP
   _baseURL: "http://catalogoapi.atwebpages.com/api.php",
 
   // Cache local de productos para contar rápidamente
