@@ -1,0 +1,63 @@
+/**formulacion***/
+/**he utilizado forma parecido del reforcam:
+https://www.reforcam.com/ **/
+#formulario
+{
+    background: rgba(0, 0, 0, 0.8);
+    padding: 60px 20px;
+    width: 100%;
+    text-align: center;
+    color: white;
+}
+#formulario h2
+{
+    font-size: 2rem;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+#formulario form
+{
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+.estilo
+{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.estilo input, .estilo select, .estilo textarea
+{
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+.estilo textarea
+{
+    resize: none;
+    min-height: 75px;
+}
+.estilo button
+{
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background-color: #9dcadd;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.estilo button:hover
+{
+    background-color: #7bb0d8;
+}
+#aceptar
+{
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    gap: 5px;
+}

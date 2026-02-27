@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Luis Reforma</title>
+        <link rel="stylesheet" type="text/css" href="css/home.css"/>
+        <link rel="stylesheet" type="text/css" href="css/formulario.css"/>
+        <link rel="stylesheet" type="text/css" href="css/footer.css"/>
+    </head>
+    <body>
+        <nav>
+            <ul>
+                <li><a href="#integrales" class="servicios">Reformas integrales</a></li>
+                <li><a href="#baños"class="servicios">Reformas de baños</a></li>
+                <li><a href="#cocinas" class="servicios">Reformas de cocinas</a></li>
+                <li><a href="#pintura" class="servicios">Pintura</a></li>
+                <li><a href="#electricidad" class="servicios">Electricidad</a></li>
+                <li><a href="#fontaneria" class="servicios">Fontanería</a></li>
+                <li><a href="#formulario" class="servicios">Contacto</a></li>
+            </ul>
+        </nav>
+        
+
+        <h1 id="titulo-principal">Luis Reforma</h1>
+
+        <!--Cada parte del servicios-->
+        <div class="seleccion">
+            <section id="integrales">
+                <p>Reformas integrales</p>
+                <a href="servicios/integrales.html">
+                    <img src="img/integral.webp" class="imagen izq"/>
+                </a>
+                <p>Introduccion ....</p>
+            </section>
+            <section id="baños">
+                <p>Reformas de baños</p>
+                <a href="servicios/baños.html" class="imagen">
+                    <img src="img/baño.jpeg" class="imagen derecha" />
+                </a>
+                <p>Introduccion ....</p>
+            </section>
+            <section id="cocinas">
+                <p>Reformas de cocinas</p>
+                <a href="servicios/cocinas.html" class="imagen">
+                    <img src="img/cocina.jpg" class="imagen izq"/>
+                </a>
+                <p>Introduccion ....</p>   
+            </section>
+            <section id="pintura">
+                <p>Pintura</p>
+                <a href="servicios/pintura.html" class="imagen">
+                    <img src="img/Pintura.webp" class="imagen derecha"/>
+                </a>
+                <p>Introduccion ....</p>   
+            </section>
+            <section id="electricidad">
+                <p>Electricidad</p>
+                <a href="servicios/electricidad.html" class="imagen">
+                    <img src="img/electricidad.webp" class="imagen izq"/>
+                </a>
+                <p>Introduccion ....</p>
+            </section>
+            <section id="fontaneria">
+                <p>Fontanería</p>
+                <a href="servicios/fontaneria.html" class="imagen">
+                    <img src="img/fontaneria.webp" class="imagen derecha"/>
+                </a>
+                <p>Introduccion ....</p>
+            </section>
+        </div>
+
+        <div id="formulario">
+            <h2>Pide tu servicio</h2>
+
+            <form class="estilo">
+                <input type="text" id="nombre" name="nombre" placeholder="nombre" required>
+                <input type="email" id="email" name="email" placeholder="email" required>
+                <input type="tel" id="telefono" name="telefono" placeholder="teléfono" required>
+
+                <select id="servicio" name="servicio" required>
+                    <option value="">Elige un interés</option>
+                    <option value="integrales">Reformas integrales</option>
+                    <option value="baños">Reformas de baños</option>
+                    <option value="cocinas">Reformas de cocinas</option>
+                    <option value="pintura">Pintura</option>
+                    <option value="electricidad">Electricidad</option>
+                    <option value="fontaneria">Fontanería</option>
+                </select>
+
+                <textarea id="mensaje" name="mensaje" placeholder="Puedes escribir aquí tu mensaje..."></textarea>   
+                
+                <label id="aceptar">
+                    <input type="checkbox"name="aceptar" required>
+                    Acepto la política de privacidad
+                </label>
+                <button type="submit">Enviar</button>
+            </form>
+        </div>
+
+         <footer>
+            <div id="informacion">
+                <h2 id="titulo-informacion">Información</h2>
+                <div id="contenido">
+                    <div id="datos">
+                        <p id="telefonoEmpresa"><strong>Teléfono:</strong> +34 123 456 789</p>
+                        <p id="emailEmpresa "><strong>Email:</strong> info@luisreforma.es</p>
+                        <p id="direccion"><strong>Dirección:</strong> Calle xxxxx, 23, Madrid</p>
+                        <p id="horario"><strong>Horario:</strong> Lunes a Viernes, 9:00 - 18:00</p>
+                    </div>
+
+                    <div id="mapa">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3037.5006862500754!2d-3.705911300000032!3d40.41991090000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd42287c516491eb%3A0xa53f91991ef7794c!2sPl.%20del%20Callao%2C%20Centro%2C%2028013%20Madrid!5e0!3m2!1sen!2ses!4v1772020989850!5m2!1sen!2ses" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+            
+        </footer>
+        <script src="js/navegador.js"></script>
+        <script src="js/animation.js"></script>
+    </body>
+</html>
